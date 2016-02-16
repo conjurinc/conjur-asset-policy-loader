@@ -22,16 +22,37 @@
 class Conjur::Command::PolicyLoaders < Conjur::Command
   desc "Server side policy management"
 
-  command :policyjobs do |cgrp|
-    cgrp.desc "Apply new policy updates"
-    cgrp.command :create do |c|
+  command :"policy-loader" do |cgrp|
+    cgrp.desc "Load new policy updates (optionally, as a dry run)"
+    cgrp.command "load" do |c|
       c.arg_name "mode"
       c.desc "Policy loading mode, which may be 'load' or 'dry-run'"
       c.default_value "load"
       c.flag [:m, :mode]
 
+      c.desc "Whether to follow the command output"
+      c.default_value false
+      c.switch [ :f, :follow ]
+        
       c.action do |global_options,options,args|
         job = api.create_policy_loader_job options
+        puts job.id
+        if options[:follow]
+          job.follow_output do |event|
+            puts [ event.name, event.data ].join(" : ")
+          end
+        end
+      end
+    end
+    
+    cgrp.desc "Prints and follows the command output of a specific job"
+    cgrp.arg "job-id"
+    cgrp.command "output" do |c|
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'JOB-ID')
+        raise "Receive extra command arguments" unless args.empty?
+
+        job = api.policy_loader_job id
         job.follow_output do |event|
           puts [ event.name, event.data ].join(" : ")
         end

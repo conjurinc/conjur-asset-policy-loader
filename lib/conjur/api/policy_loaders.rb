@@ -28,5 +28,10 @@ module Conjur
       resp = RestClient::Resource.new(Conjur.configuration.policy_loader_url, credentials)['jobs'].post(options)
       Conjur::PolicyLoaderJob.new(resp.headers[:location], credentials)
     end
+    
+    def policy_loader_job id
+      job_resource = RestClient::Resource.new(Conjur.configuration.policy_loader_url, credentials)['jobs'][id]
+      Conjur::PolicyLoaderJob.new(job_resource.url, credentials)
+    end
   end
 end
