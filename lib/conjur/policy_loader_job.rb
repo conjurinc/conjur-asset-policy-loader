@@ -23,6 +23,10 @@ module Conjur
   class PolicyLoaderJob < RestClient::Resource
     include Conjur::HasId
     
+    def abort
+      self.delete
+    end
+    
     def follow_output &block
       require 'conjur/event_source'
       
