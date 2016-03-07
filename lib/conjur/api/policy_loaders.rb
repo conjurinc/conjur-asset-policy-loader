@@ -24,7 +24,8 @@ module Conjur
   class API
     # Options:
     # +mode+ loading mode, e.g. +dry-run+ or +load+.
-    def create_policy_loader_job options={}
+    def create_policy_loader_job repository_id, options={}
+      options[:repository_id] = repository_id
       resp = RestClient::Resource.new(Conjur.configuration.policy_loader_url, credentials)['jobs'].post(options)
       Conjur::PolicyLoaderJob.new(resp.headers[:location], credentials)
     end

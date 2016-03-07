@@ -24,6 +24,7 @@ class Conjur::Command::PolicyLoaders < Conjur::Command
 
   command :"policy-loader" do |cgrp|
     cgrp.desc "Load new policy updates (optionally, as a dry run)"
+    cgrp.arg "repository-id"
     cgrp.command "load" do |c|
       c.arg_name "mode"
       c.desc "Policy loading mode, which may be 'load' or 'dry-run'"
@@ -35,7 +36,10 @@ class Conjur::Command::PolicyLoaders < Conjur::Command
       c.switch [ :f, :follow ]
         
       c.action do |global_options,options,args|
-        job = api.create_policy_loader_job options
+        repository_id = require_arg(args, 'REPOSITORY-ID')
+        raise "Receive extra command arguments" unless args.empty?
+        
+        job = api.create_policy_loader_job repository_id, options
         puts job.id
         if options[:follow]
           job.follow_output do |event|
